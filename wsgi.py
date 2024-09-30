@@ -39,6 +39,28 @@ def create_user_command(username, password):
 
 # this command will be : flask user create bob bobpass
 
+@app.cli.command("get-user", help="Retrieves a User")
+@click.argument('username', default='bob')
+def get_user(username):
+  bob = User.query.filter_by(username=username).first()
+  if not bob:
+    print(f'{username} not found!')
+    return
+  print(bob)
+
+@user_cli.command('delete-user')
+@click.argument('username', default='bob')
+def delete_user(username):
+  bob = User.query.filter_by(username=username).first()
+  if not bob:
+      print(f'{username} not found!')
+      return
+  db.session.delete(bob)
+  db.session.commit()
+  print(f'{username} deleted')
+
+  # this command will delete user bob
+
 @user_cli.command("list", help="Lists users in the database")
 @click.argument("format", default="string")
 def list_user_command(format):
@@ -48,6 +70,8 @@ def list_user_command(format):
         print(get_all_users_json())
 
 app.cli.add_command(user_cli) # add the group to the cli
+
+# this command will flask user lsit
 
 '''
 Test Commands
@@ -67,3 +91,7 @@ def user_tests_command(type):
     
 
 app.cli.add_command(test)
+
+'''
+Course Commands
+'''
