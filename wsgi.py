@@ -4,9 +4,10 @@ from flask.cli import with_appcontext, AppGroup
 
 from App.database import db, get_migrate
 from App.models import User
+from App.models import Course
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
-
+from App.controllers import ( create_course, get_all_courses, get_all_courses_json )
 
 # This commands file allow you to create convenient CLI commands for testing controllers
 
@@ -99,5 +100,54 @@ def user_tests_command(type):
 app.cli.add_command(test)
 
 '''
-Course Commands
+COURSE COMMANDS
 '''
+
+course_cli = AppGroup('course', help='Course object commands') 
+
+@course_cli.command("create-course", help="Creates a new course")
+@click.argument("name")
+@click.argument("username", default="rob")
+@click.argument("password", default="robpass")
+def create_course_command(name, username, password):
+    create_course(name, username, password)
+    print(f'{username} created!')
+
+@course_cli.command("get-course", help="Retrieves a Course")
+@click.argument('username', default='bob')
+def get_user(username):
+  comp = Course.query.filter_by(username=username).first()
+  if not comp:
+    print(f'{username} not found!')
+    return
+  print(comp)
+
+@app.cli.command('get-courses')
+def get_courses():
+# gets all objects of a model
+  courses = Course.query.all()
+  print(courses)
+
+@course_cli.command('delete-course')
+@click.argument('username', default='comp')
+def delete_course(username):
+  comp = Course.query.filter_by(username=username).first()
+  if not comp:
+      print(f'{username} not found!')
+      return
+  db.session.delete(comp)
+  db.session.commit()
+  print(f'{username} deleted')
+
+  # this command will delete user bob
+
+@course_cli.command("list", help="Lists courses in the database")
+@click.argument("format", default="string")
+def list_course_command(format):
+    if format == 'string':
+        print(get_all_courses())
+    else:
+        print(get_all_courses_json())
+
+
+app.cli.add_command(course_cli)
