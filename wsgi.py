@@ -39,7 +39,7 @@ def create_user_command(username, password):
 
 # this command will be : flask user create bob bobpass
 
-@app.cli.command("get-user", help="Retrieves a User")
+@user_cli.command("get-user", help="Retrieves a User")
 @click.argument('username', default='bob')
 def get_user(username):
   bob = User.query.filter_by(username=username).first()
@@ -47,6 +47,12 @@ def get_user(username):
     print(f'{username} not found!')
     return
   print(bob)
+
+@app.cli.command('get-users')
+def get_users():
+# gets all objects of a model
+  users = User.query.all()
+  print(users)
 
 @user_cli.command('delete-user')
 @click.argument('username', default='bob')
@@ -71,7 +77,7 @@ def list_user_command(format):
 
 app.cli.add_command(user_cli) # add the group to the cli
 
-# this command will flask user lsit
+# this command will flask user list
 
 '''
 Test Commands
