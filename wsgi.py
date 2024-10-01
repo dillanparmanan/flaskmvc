@@ -5,9 +5,11 @@ from flask.cli import with_appcontext, AppGroup
 from App.database import db, get_migrate
 from App.models import User
 from App.models import Course
+from App.models import Lecturer
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
 from App.controllers import ( create_course, get_all_courses, get_all_courses_json )
+from App.controllers import ( create_lecturer, get_all_lecturers, get_all_lecturers_json)
 
 # This commands file allow you to create convenient CLI commands for testing controllers
 
@@ -106,15 +108,15 @@ COURSE COMMANDS
 course_cli = AppGroup('course', help='Course object commands') 
 
 @course_cli.command("create-course", help="Creates a new course")
-@click.argument("name")
-@click.argument("username", default="rob")
-@click.argument("password", default="robpass")
+@click.argument("name", default="comp1600")
+@click.argument("username", default="comp")
+@click.argument("password", default="comppass")
 def create_course_command(name, username, password):
     create_course(name, username, password)
     print(f'{username} created!')
 
 @course_cli.command("get-course", help="Retrieves a Course")
-@click.argument('username', default='bob')
+@click.argument('username', default='comp')
 def get_user(username):
   comp = Course.query.filter_by(username=username).first()
   if not comp:
@@ -151,3 +153,42 @@ def list_course_command(format):
 
 
 app.cli.add_command(course_cli)
+
+'''
+LECTURER COMMANDS
+'''
+lecturer_cli = AppGroup('lecturer', help='User object commands') 
+
+@app.cli.command("create-lecturer", help="Creates a lecturer")
+@click.argument("firstname", default="nicholas")
+@click.argument("lastname", default="mendez")
+@click.argument("email", default="nicholasmendez@email.com")
+def create_lecturer_command(firstname, lastname, email):
+    create_lecturer(firstname, lastname, email)
+    print(f'{firstname} created!')
+
+@app.cli.command('get-lecturers')
+@click.argument('name', default='comp')
+def get_course_lecturers(name):
+   comp = Course.query.filter_by(name=name).first()
+   if not comp:
+      print(f'{name} not found!')
+      return
+   print(comp.lecturers)
+
+@app.cli.command('add-lecturer')
+@click.argument('username', default='comp')
+@click.argument('firstname', default='nicholas')
+@click.argument('lastname', default='mendez')
+@click.argument('email', default='nicholasmendez@email.com')
+def add_lecturer(username, firstname, lastname, email):
+  comp = Course.query.filter_by(username=username).first()
+  if not comp:
+     print(f'{username} not found!')
+     return
+  new_lecturer = Lecturer(firstname=firstname, lastname=lastname, email=email)
+  comp.lecturers.append(new_lecturer)
+  db.session.add(comp)
+  db.session.commit()
+
+app.cli.add_command(lecturer_cli)
