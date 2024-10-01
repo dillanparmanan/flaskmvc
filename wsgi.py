@@ -10,6 +10,7 @@ from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
 from App.controllers import ( create_course, get_all_courses, get_all_courses_json )
 from App.controllers import ( create_lecturer, get_all_lecturers, get_all_lecturers_json)
+from App.controllers import ( create_ta )
 
 # This commands file allow you to create convenient CLI commands for testing controllers
 
@@ -190,5 +191,40 @@ def add_lecturer(username, firstname, lastname, email):
   comp.lecturers.append(new_lecturer)
   db.session.add(comp)
   db.session.commit()
+
+@app.cli.command("create-ta", help="Creates a ta")
+@click.argument("firstname", default="sergio")
+@click.argument("lastname", default="math")
+@click.argument("email", default="sergiomath@email.com")
+def create_ta_command(firstname, lastname, email):
+    create_ta(firstname, lastname, email)
+    print(f'{firstname} created!')
+
+@app.cli.command('get-tas')
+@click.argument('name', default='comp')
+def get_course_lecturers(name):
+   comp = Course.query.filter_by(name=name).first()
+   if not comp:
+      print(f'{name} not found!')
+      return
+   print(comp.tas)
+
+'''
+@app.cli.command('add-ta')
+@click.argument('username', default='comp')
+@click.argument('firstname', default='sergio')
+@click.argument('lastname', default='math')
+@click.argument('email', default='sergiomath@email.com')
+def add_ta(username, firstname, lastname, email):
+  comp = Course.query.filter_by(username=username).first()
+  if not comp:
+     print(f'{username} not found!')
+     return
+  new_ta = Ta(firstname=firstname, lastname=lastname, email=email)
+  comp.tas.append(new_ta)
+  db.session.add(comp)
+  db.session.commit()
+'''
+
 
 app.cli.add_command(lecturer_cli)

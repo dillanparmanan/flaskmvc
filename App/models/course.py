@@ -7,6 +7,8 @@ class Course(db.Model):
     username =  db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.String(120), nullable=False)
     lecturers = db.relationship('Lecturer', backref='course', lazy=True, cascade="all, delete-orphan")
+    tas = db.relationship('Ta', backref='course', lazy=True, cascade="all, delete-orphan")
+    tutors = db.relationship('Tutor', backref='course', lazy=True, cascade="all, delete-orphan")
 
     def __init__(self, name, username, password):
         self.name = name
@@ -28,4 +30,4 @@ class Course(db.Model):
         return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return f'Course {self.id} - {self.name} {self.username} - {self.lecturers}'
+        return f'Course {self.id} - {self.name} - {self.username} - {self.lecturers} - {self.tas} - {self.tutors}'
