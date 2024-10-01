@@ -8,5 +8,5 @@ def initialize():
     db.drop_all()
     db.create_all()
     create_user('bob', 'bobpass')
-    create_course('comp1600','comp','comppass')
+    create_course('comp1600','computing')
     #create_lecturer('nicholas', 'mendez', 'nicholasmendez@email.com')

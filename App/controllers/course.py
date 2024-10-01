@@ -1,14 +1,14 @@
 from App.models import Course
 from App.database import db
 
-def create_course(name, username, password):
-    newcourse = Course(name=name, username=username, password=password)
+def create_course(code, name):
+    newcourse = Course(code=code, name=name)
     db.session.add(newcourse)
     db.session.commit()
     return newcourse
 
-def get_course_by_username(username):
-    return Course.query.filter_by(username=username).first()
+def get_course_by_code(code):
+    return Course.query.filter_by(code=code).first()
 
 def get_course(id):
     return Course.query.get(id)
@@ -23,10 +23,10 @@ def get_all_courses_json():
     courses = [courses.get_json() for course in courses]
     return courses
 
-def update_course(id, username):
+def update_coursecode(id, code):
     course = get_course(id)
     if course:
-        course.username = username
+        course.code = code
         db.session.add(course)
         return db.session.commit()
     return None

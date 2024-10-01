@@ -32,4 +32,4 @@ class Lecturer(db.Model):
  #       return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return f'<Lecturer {self.id} - {self.firstname} - {self.lastname}>'
+        return f'<Lecturer {self.id} - {self.firstname} {self.lastname}>'

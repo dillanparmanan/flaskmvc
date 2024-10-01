@@ -6,11 +6,14 @@ from App.database import db, get_migrate
 from App.models import User
 from App.models import Course
 from App.models import Lecturer
+from App.models import Ta
+from App.models import Tutor
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
 from App.controllers import ( create_course, get_all_courses, get_all_courses_json )
 from App.controllers import ( create_lecturer, get_all_lecturers, get_all_lecturers_json)
 from App.controllers import ( create_ta )
+from App.controllers import ( create_tutor )
 
 # This commands file allow you to create convenient CLI commands for testing controllers
 
@@ -109,19 +112,18 @@ COURSE COMMANDS
 course_cli = AppGroup('course', help='Course object commands') 
 
 @course_cli.command("create-course", help="Creates a new course")
-@click.argument("name", default="comp1600")
-@click.argument("username", default="comp")
-@click.argument("password", default="comppass")
-def create_course_command(name, username, password):
-    create_course(name, username, password)
-    print(f'{username} created!')
+@click.argument("code", default="comp1600")
+@click.argument("name", default="Computing")
+def create_course_command(code, name):
+    create_course(code, name)
+    print(f'{code} created!')
 
 @course_cli.command("get-course", help="Retrieves a Course")
-@click.argument('username', default='comp')
-def get_user(username):
-  comp = Course.query.filter_by(username=username).first()
+@click.argument('code', default='comp')
+def get_course(code):
+  comp = Course.query.filter_by(code=code).first()
   if not comp:
-    print(f'{username} not found!')
+    print(f'{code} not found!')
     return
   print(comp)
 
@@ -132,15 +134,15 @@ def get_courses():
   print(courses)
 
 @course_cli.command('delete-course')
-@click.argument('username', default='comp')
-def delete_course(username):
-  comp = Course.query.filter_by(username=username).first()
+@click.argument('code', default='comp')
+def delete_course(code):
+  comp = Course.query.filter_by(code=code).first()
   if not comp:
-      print(f'{username} not found!')
+      print(f'{code} not found!')
       return
   db.session.delete(comp)
   db.session.commit()
-  print(f'{username} deleted')
+  print(f'{code} deleted')
 
   # this command will delete user bob
 
@@ -177,20 +179,37 @@ def get_course_lecturers(name):
       return
    print(comp.lecturers)
 
-@app.cli.command('add-lecturer')
-@click.argument('username', default='comp')
+# Creates the lecture and adds it into the course
+@app.cli.command('create-add-lecturer')
+@click.argument('code', default='comp')
 @click.argument('firstname', default='nicholas')
 @click.argument('lastname', default='mendez')
 @click.argument('email', default='nicholasmendez@email.com')
-def add_lecturer(username, firstname, lastname, email):
-  comp = Course.query.filter_by(username=username).first()
+def add_lecturer(code, firstname, lastname, email):
+  comp = Course.query.filter_by(code=code).first()
   if not comp:
-     print(f'{username} not found!')
+     print(f'{code} not found!')
      return
   new_lecturer = Lecturer(firstname=firstname, lastname=lastname, email=email)
   comp.lecturers.append(new_lecturer)
   db.session.add(comp)
   db.session.commit()
+
+# Finds the already created lecturer and adds it to course
+@app.cli.command('add-lecturer')
+@click.argument('code', default='comp1600')
+@click.argument('firstname', default='nicholas')
+def add_lecturer(code, firstname):
+  course = Course.query.filter_by(code=code).first()
+  if not course:
+     print(f'{code} not found!')
+     return
+  add_lecturer = Lecturer.query.filter_by(firstname=firstname).first()
+  course.lecturers.append(add_lecturer)
+  print(f'{add_lecturer.firstname} was added to {course.code}')
+  db.session.add(course)
+  db.session.commit()
+
 
 @app.cli.command("create-ta", help="Creates a ta")
 @click.argument("firstname", default="sergio")
@@ -202,15 +221,15 @@ def create_ta_command(firstname, lastname, email):
 
 @app.cli.command('get-tas')
 @click.argument('name', default='comp')
-def get_course_lecturers(name):
-   comp = Course.query.filter_by(name=name).first()
+def get_course_tas(name):
+   comp = Ta.query.filter_by(name=name).first()
    if not comp:
       print(f'{name} not found!')
       return
    print(comp.tas)
 
-'''
-@app.cli.command('add-ta')
+
+@app.cli.command('create-add-ta')
 @click.argument('username', default='comp')
 @click.argument('firstname', default='sergio')
 @click.argument('lastname', default='math')
@@ -224,7 +243,68 @@ def add_ta(username, firstname, lastname, email):
   comp.tas.append(new_ta)
   db.session.add(comp)
   db.session.commit()
-'''
+
+@app.cli.command('add-ta')
+@click.argument('code', default='comp1600')
+@click.argument('firstname', default='nicholas')
+def add_ta(code, firstname):
+  course = Course.query.filter_by(code=code).first()
+  if not course:
+     print(f'{code} not found!')
+     return
+  add_ta = Ta.query.filter_by(firstname=firstname).first()
+  course.tas.append(add_ta)
+  print(f'{add_ta.firstname} was added to {course.code}')
+  db.session.add(course)
+  db.session.commit()
+
+@app.cli.command("create-tutor", help="Creates a tutor")
+@click.argument("firstname", default="sergio")
+@click.argument("lastname", default="math")
+@click.argument("email", default="sergiomath@email.com")
+def create_tutor_command(firstname, lastname, email):
+    create_tutor(firstname, lastname, email)
+    print(f'{firstname} created!')
+
+@app.cli.command('get-tutors')
+@click.argument('name', default='comp')
+def get_course_tutors(name):
+   comp = Tutor.query.filter_by(name=name).first()
+   if not comp:
+      print(f'{name} not found!')
+      return
+   print(comp.tutors)
+
+@app.cli.command('create-add-tutor')
+@click.argument('username', default='comp')
+@click.argument('firstname', default='sergio')
+@click.argument('lastname', default='math')
+@click.argument('email', default='sergiomath@email.com')
+def add_ta(username, firstname, lastname, email):
+  comp = Course.query.filter_by(username=username).first()
+  if not comp:
+     print(f'{username} not found!')
+     return
+  new_tutor = Tutor(firstname=firstname, lastname=lastname, email=email)
+  comp.tas.append(new_tutor)
+  db.session.add(comp)
+  db.session.commit()
+
+@app.cli.command('add-tutor')
+@click.argument('code', default='comp1600')
+@click.argument('firstname', default='nicholas')
+def add_tutor(code, firstname):
+  course = Course.query.filter_by(code=code).first()
+  if not course:
+     print(f'{code} not found!')
+     return
+  add_tutor = Tutor.query.filter_by(firstname=firstname).first()
+  course.tutors.append(add_ta)
+  print(f'{add_tutor.firstname} was added to {course.code}')
+  db.session.add(course)
+  db.session.commit()
+
+
 
 
 app.cli.add_command(lecturer_cli)
